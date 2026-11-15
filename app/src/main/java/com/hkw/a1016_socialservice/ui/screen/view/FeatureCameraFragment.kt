@@ -1,11 +1,14 @@
 package com.hkw.a1016_socialservice.ui.screen.view
 
 import android.Manifest
+import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.speech.RecognizerIntent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -40,6 +43,16 @@ class FeatureCameraFragment : Fragment() {
     private var audioFile: File? = null
     private var isRecording = false
 
+
+    private val sttLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
+        it ->
+        if (it.resultCode == Activity.RESULT_OK) {
+            val text = it.data
+                ?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                ?.firstOrNull()
+            Log.d("음성인식", "결과: $text")
+        }
+    }
 
     private val _takePicture =
         registerForActivityResult(ActivityResultContracts.TakePicture()) { it ->
@@ -102,6 +115,20 @@ class FeatureCameraFragment : Fragment() {
                 _recordPermission.launch(Manifest.permission.RECORD_AUDIO)
             }
         }
+        binding.sttBtn.setOnClickListener {
+            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ko-KR")
+                putExtra(RecognizerIntent.EXTRA_PROMPT, "말씀하세요")
+            }
+            try {
+                sttLauncher.launch(intent)
+            } catch (e: Exception) {
+                Log.d("stt error", "error : ${e}")
+                Toast.makeText(requireContext(),"stt 앱 에러", Toast.LENGTH_SHORT).show()
+            }
+        }
+
 
     }
 
@@ -129,20 +156,25 @@ class FeatureCameraFragment : Fragment() {
         val file = File(dir, "REC_${System.currentTimeMillis()}.m4a")
         audioFile = file
 
-        recorder = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-            MediaRecorder(requireContext())
-        else
-            @Suppress("DEPRECATION") MediaRecorder()
-                ).apply {
-                setAudioSource(MediaRecorder.AudioSource.MIC)
-                setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-                setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-                setAudioSamplingRate(44100)
-                setAudioEncodingBitRate(128_000)
-                setOutputFile(file.absolutePath)
-                prepare()
-                start()
-            }
+//        var newRecord: MediaRecorder
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+            recorder = MediaRecorder(requireContext())
+        }else{
+            @Suppress("DEPRECATION")
+            recorder = MediaRecorder()
+        }
+        recorder?.apply {
+            setAudioSource(MediaRecorder.AudioSource.MIC)
+            setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+            setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+            setAudioSamplingRate(44100)
+            setAudioEncodingBitRate(128_000)
+            setOutputFile(file.absolutePath)
+            prepare()
+            start()
+        }
+
+
         isRecording = true
         Log.d("녹음", "녹음 시작: ${file.absolutePath}")
         binding.recordBtn.text = "녹음중지"
