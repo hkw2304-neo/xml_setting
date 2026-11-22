@@ -39,6 +39,7 @@ class MainFragment : Fragment(){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 별도 선언안하면 포그라운드에서 작업
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             Log.d("where thread1" , Thread.currentThread().name)
         }
@@ -49,8 +50,6 @@ class MainFragment : Fragment(){
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Default) {
             Log.d("where thread3" , Thread.currentThread().name)
         }
-
-
 
         // 비동기로 시작되서 안기달리고 3-1-2 찍힌다
         viewLifecycleOwner.lifecycleScope.launch {
