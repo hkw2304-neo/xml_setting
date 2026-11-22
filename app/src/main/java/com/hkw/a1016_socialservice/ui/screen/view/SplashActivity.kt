@@ -25,7 +25,7 @@ class SplashActivity: AppCompatActivity() {
 
         setContentView(_binding.root)
         _viewModel.splashCountDecrease()
-        lifecycleScope.launch {
+            lifecycleScope.launch {
                 repeatOnLifecycle(Lifecycle.State.STARTED){
                     _viewModel.state.collect{
                     _binding.splashCount.text = it.splashCount.toString()
@@ -40,7 +40,6 @@ class SplashActivity: AppCompatActivity() {
                             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
                     }
                 }
-
             }
         }
     }

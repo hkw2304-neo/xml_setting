@@ -1,13 +1,20 @@
 package com.hkw.a1016_socialservice.ui.screen.view
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.tabs.TabLayoutMediator
 import com.hkw.a1016_socialservice.databinding.DashboardFragmentBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 @AndroidEntryPoint
 class DashboardFragment : Fragment() {
@@ -26,6 +33,8 @@ class DashboardFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+
 
         val titles = listOf("탭1", "탭2")
         binding.viewPager.adapter = DashboardTabAdapter(this)
